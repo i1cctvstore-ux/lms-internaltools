@@ -1,11 +1,158 @@
 <!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-<title>LMS Internal</title>
-<style>
-  :root{
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+        <title> LMS Internal </title>
+    </head>
+    <body>
+        <div id="screen-login" class="screen active">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="mark">i1</div>
+      <h1>LMS Internal</h1>
+      <p class="sub">Masuk untuk mulai belajar materi perusahaan.</p>
+      <div id="login-error" class="login-error">Username atau password salah.</div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="login-username" autocomplete="username" placeholder="mis. budi">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="login-password" autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <button class="btn-primary" onclick="handleLogin()">Masuk</button>
+      <div class="login-hint">Lupa akun? Hubungi admin.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ USER DASHBOARD ============ -->
+<div id="screen-user" class="screen">
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span> LMS Internal</div>
+    <div class="who">
+      <span><b id="user-display-name"></b></span>
+      <button class="logout-btn" onclick="handleLogout()">Keluar</button>
+    </div>
+  </div>
+  <div class="container">
+    <div class="progress-card">
+      <div class="progress-ring" id="progress-ring" style="--pct:0;">
+        <span id="progress-pct-text">0%</span>
+      </div>
+      <div class="progress-text">
+        <b id="progress-summary-line">0 dari 0 materi selesai</b>
+        <small>Materi yang sudah diverifikasi admin dihitung selesai</small>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <h2>Daftar Materi</h2>
+      <span class="count" id="material-count-text"></span>
+    </div>
+    <div class="material-list" id="user-material-list"></div>
+  </div>
+</div>
+
+<!-- ============ ADMIN DASHBOARD ============ -->
+<div id="screen-admin" class="screen">
+  <div class="topbar">
+    <div class="brand"><span class="dot"></span> LMS Internal · Admin</div>
+    <div class="who">
+      <span><b id="admin-display-name"></b></span>
+      <button class="logout-btn" onclick="handleLogout()">Keluar</button>
+    </div>
+  </div>
+  <div class="container">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="review" onclick="switchAdminTab('review')">Verifikasi</button>
+      <button class="tab-btn" data-tab="materials" onclick="switchAdminTab('materials')">Materi</button>
+      <button class="tab-btn" data-tab="users" onclick="switchAdminTab('users')">Karyawan</button>
+    </div>
+
+    <!-- Tab: Review -->
+    <div class="tab-panel active" id="tab-review">
+      <div class="section-head">
+        <h2>Menunggu Verifikasi</h2>
+        <span class="count" id="review-count-text"></span>
+      </div>
+      <div id="review-list"></div>
+    </div>
+
+    <!-- Tab: Materials -->
+    <div class="tab-panel" id="tab-materials">
+      <div class="add-material-card">
+        <h3>Tambah Materi Baru</h3>
+        <div class="field">
+          <label>Judul</label>
+          <input type="text" id="new-material-title" placeholder="mis. SOP Instalasi CCTV Indoor">
+        </div>
+        <div class="field">
+          <label>Isi Materi</label>
+          <textarea id="new-material-content" placeholder="Tulis isi materi di sini..."></textarea>
+        </div>
+        <button class="btn-primary" onclick="addMaterial()">Tambah Materi</button>
+      </div>
+
+      <div class="section-head">
+        <h2>Semua Materi</h2>
+        <span class="count" id="materials-count-text"></span>
+      </div>
+      <div id="admin-material-list"></div>
+    </div>
+
+    <!-- Tab: Users -->
+    <div class="tab-panel" id="tab-users">
+      <div class="add-material-card">
+        <h3>Tambah Karyawan</h3>
+        <div class="field">
+          <label>Nama</label>
+          <input type="text" id="new-user-name" placeholder="mis. Budi Santoso">
+        </div>
+        <div class="field">
+          <label>Username</label>
+          <input type="text" id="new-user-username" placeholder="mis. budi">
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="text" id="new-user-password" placeholder="mis. budi123">
+        </div>
+        <button class="btn-primary" onclick="addUser()">Tambah Karyawan</button>
+      </div>
+
+      <div class="section-head">
+        <h2>Daftar Karyawan</h2>
+        <span class="count" id="users-count-text"></span>
+      </div>
+      <div id="admin-user-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MATERIAL DETAIL OVERLAY ============ -->
+<div class="overlay" id="overlay-detail">
+  <div class="overlay-top">
+    <button class="back-btn" onclick="closeDetail()">←</button>
+    <h2 id="detail-title">Judul Materi</h2>
+  </div>
+  <div class="detail-body">
+    <div class="meta-row">
+      <span class="status-pill" id="detail-status-pill">Belum dipelajari</span>
+    </div>
+    <div class="content-box" id="detail-content"></div>
+  </div>
+  <div class="mark-done-bar">
+    <div class="inner">
+      <button class="btn-mark to-submit" id="detail-mark-btn" onclick="submitProgress()"></button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+    </body>
+    <style>
+        :root{
     --navy-900:#0b1730;
     --navy-800:#13213f;
     --navy-700:#1c2f54;
@@ -562,164 +709,7 @@
     .container{ padding:16px 14px 90px; }
   }
 </style>
-</head>
-<body>
-
-<!-- ============ LOGIN ============ -->
-<div id="screen-login" class="screen active">
-  <div class="login-wrap">
-    <div class="login-card">
-      <div class="mark">i1</div>
-      <h1>LMS Internal</h1>
-      <p class="sub">Masuk untuk mulai belajar materi perusahaan.</p>
-      <div id="login-error" class="login-error">Username atau password salah.</div>
-      <div class="field">
-        <label>Username</label>
-        <input type="text" id="login-username" autocomplete="username" placeholder="mis. budi">
-      </div>
-      <div class="field">
-        <label>Password</label>
-        <input type="password" id="login-password" autocomplete="current-password" placeholder="••••••••">
-      </div>
-      <button class="btn-primary" onclick="handleLogin()">Masuk</button>
-      <div class="login-hint">Lupa akun? Hubungi admin.</div>
-    </div>
-  </div>
-</div>
-
-<!-- ============ USER DASHBOARD ============ -->
-<div id="screen-user" class="screen">
-  <div class="topbar">
-    <div class="brand"><span class="dot"></span> LMS Internal</div>
-    <div class="who">
-      <span><b id="user-display-name"></b></span>
-      <button class="logout-btn" onclick="handleLogout()">Keluar</button>
-    </div>
-  </div>
-  <div class="container">
-    <div class="progress-card">
-      <div class="progress-ring" id="progress-ring" style="--pct:0;">
-        <span id="progress-pct-text">0%</span>
-      </div>
-      <div class="progress-text">
-        <b id="progress-summary-line">0 dari 0 materi selesai</b>
-        <small>Materi yang sudah diverifikasi admin dihitung selesai</small>
-      </div>
-    </div>
-
-    <div class="section-head">
-      <h2>Daftar Materi</h2>
-      <span class="count" id="material-count-text"></span>
-    </div>
-    <div class="material-list" id="user-material-list"></div>
-  </div>
-</div>
-
-<!-- ============ ADMIN DASHBOARD ============ -->
-<div id="screen-admin" class="screen">
-  <div class="topbar">
-    <div class="brand"><span class="dot"></span> LMS Internal · Admin</div>
-    <div class="who">
-      <span><b id="admin-display-name"></b></span>
-      <button class="logout-btn" onclick="handleLogout()">Keluar</button>
-    </div>
-  </div>
-  <div class="container">
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="review" onclick="switchAdminTab('review')">Verifikasi</button>
-      <button class="tab-btn" data-tab="materials" onclick="switchAdminTab('materials')">Materi</button>
-      <button class="tab-btn" data-tab="users" onclick="switchAdminTab('users')">Karyawan</button>
-    </div>
-
-    <!-- Tab: Review -->
-    <div class="tab-panel active" id="tab-review">
-      <div class="section-head">
-        <h2>Menunggu Verifikasi</h2>
-        <span class="count" id="review-count-text"></span>
-      </div>
-      <div id="review-list"></div>
-    </div>
-
-    <!-- Tab: Materials -->
-    <div class="tab-panel" id="tab-materials">
-      <div class="add-material-card">
-        <h3>Tambah Materi Baru</h3>
-        <div class="field">
-          <label>Judul</label>
-          <input type="text" id="new-material-title" placeholder="mis. SOP Instalasi CCTV Indoor">
-        </div>
-        <div class="field">
-          <label>Isi Materi</label>
-          <textarea id="new-material-content" placeholder="Tulis isi materi di sini..."></textarea>
-        </div>
-        <button class="btn-primary" onclick="addMaterial()">Tambah Materi</button>
-      </div>
-
-      <div class="section-head">
-        <h2>Semua Materi</h2>
-        <span class="count" id="materials-count-text"></span>
-      </div>
-      <div id="admin-material-list"></div>
-    </div>
-
-    <!-- Tab: Users -->
-    <div class="tab-panel" id="tab-users">
-      <div class="add-material-card">
-        <h3>Tambah Karyawan</h3>
-        <div class="field">
-          <label>Nama</label>
-          <input type="text" id="new-user-name" placeholder="mis. Budi Santoso">
-        </div>
-        <div class="field">
-          <label>Username</label>
-          <input type="text" id="new-user-username" placeholder="mis. budi">
-        </div>
-        <div class="field">
-          <label>Password</label>
-          <input type="text" id="new-user-password" placeholder="mis. budi123">
-        </div>
-        <button class="btn-primary" onclick="addUser()">Tambah Karyawan</button>
-      </div>
-
-      <div class="section-head">
-        <h2>Daftar Karyawan</h2>
-        <span class="count" id="users-count-text"></span>
-      </div>
-      <div id="admin-user-list"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ============ MATERIAL DETAIL OVERLAY ============ -->
-<div class="overlay" id="overlay-detail">
-  <div class="overlay-top">
-    <button class="back-btn" onclick="closeDetail()">←</button>
-    <h2 id="detail-title">Judul Materi</h2>
-  </div>
-  <div class="detail-body">
-    <div class="meta-row">
-      <span class="status-pill" id="detail-status-pill">Belum dipelajari</span>
-    </div>
-    <div class="content-box" id="detail-content"></div>
-  </div>
-  <div class="mark-done-bar">
-    <div class="inner">
-      <button class="btn-mark to-submit" id="detail-mark-btn" onclick="submitProgress()"></button>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
 <script>
-/* =========================================================
-   DATA LAYER — localStorage
-   Struktur:
-   lms_users: [{id, name, username, password, role}]
-   lms_materials: [{id, title, content, createdAt}]
-   lms_progress: [{id, userId, materialId, status, submittedAt, reviewedAt}]
-   status progress: "not_started" (tdk disimpan) | "pending" | "approved" | "rejected"
-   ========================================================= */
 
 const DEFAULT_DATA = {
   users: [
@@ -728,486 +718,536 @@ const DEFAULT_DATA = {
     { id: "u2", name: "Siti Aminah", username: "siti", password: "siti123", role: "employee" }
   ],
   materials: [
-    { id: "m1", title: "Coba pakai Trello", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Soal Uji:
+    /* Materi m1 s/d m91 Anda tetap di sini (pastikan m29 cuma satu) */
+    { id: "m1", title: "Coba pakai Trello", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Soal Uji:
 1. Buka Trello, tunjukkan card yang sedang kamu kerjakan minggu ini.
 2. Ubah label card ini jadi hijau, lalu jelaskan artinya apa.
-3. Siapa yang boleh centang card sebagai selesai?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m2", title: "Pelajarin baca tipe", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Checklist: 3/5
+3. Siapa yang boleh centang card sebagai selesai?`, createdAt: "2026-01-15T08:00:00.000Z" },
 
-      Referensi: Google Sheets tipe produk
+{ id: "m2", title: "Pelajarin baca tipe", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Checklist: 3/5
+
+Referensi: Google Sheets tipe produk
 
 Soal Uji:
 1. Tunjukkan kode tipe ini [kasih 1 kode produk], artinya apa?
 2. Dari kode tipe, bisa tahu tidak ini kamera indoor atau outdoor?
-3. Kalau customer tanya \"kamera 2MP varifocal outdoor\", kode tipe yang cocok mana?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m3", title: "Cara kasi harga dari price list (Harga net & Hikvision)", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Soal Uji:
+3. Kalau customer tanya "kamera 2MP varifocal outdoor", kode tipe yang cocok mana?`, createdAt: "2026-01-15T08:00:00.000Z" },
+   
+{ id: "m3", title: "Cara kasi harga dari price list (Harga net & Hikvision)", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Soal Uji:
 1. Buka price list, tunjukkan harga net untuk produk ini [kasih 1 produk].
 2. Apa bedanya harga net dengan harga Hikvision?
-3. Kalau reseller tanya harga, kasih yang mana?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m4", title: "Cara buat invoice Accurate dan nyalain/matiin komputer dari awal + scan barang", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Akun: lleyoni@yahoo.com / Password
+3. Kalau reseller tanya harga, kasih yang mana?`, createdAt: "2026-01-15T08:00:00.000Z" },
 
+{ id: "m4", title: "Cara buat invoice Accurate dan nyalain/matiin komputer dari awal + scan barang", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Akun: lleyoni@yahoo.com / Password
 Soal Uji:
 1. Nyalakan komputer dari awal sampai masuk ke Accurate.
 2. Buat invoice untuk 1 item dummy yang saya kasih sekarang.
 3. Scan barang ini [kasih 1 produk], pastikan masuk ke invoice.
-4. Matikan komputer dengan benar.", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m5", title: "Urus order Tokped, Shopee", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Soal Uji:
+4. Matikan komputer dengan benar.`, createdAt: "2026-01-15T08:00:00.000Z" },
+   
+{ id: "m5", title: "Urus order Tokped, Shopee", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Soal Uji:
 1. Ada order masuk di Tokped, tunjukkan langkah dari terima order sampai cetak resi.
 2. Kalau stok habis tapi order sudah masuk, kamu ngapain?
-3. Bagaimana cara tandai order sudah dikirim?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m6", title: "Test/cara jelasin paket", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Soal Uji:
+3. Bagaimana cara tandai order sudah dikirim?`, createdAt: "2026-01-15T08:00:00.000Z" },
+   
+{ id: "m6", title: "Test/cara jelasin paket", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Soal Uji:
 1. Saya mau pasang CCTV 4 titik di rumah, jelaskan paket apa yang cocok.
 2. Apa bedanya paket analog dan IP?
-3. Kalau budget terbatas, rekomendasinya apa?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m7", title: "Coba tulis surat service dan catat di app", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Soal Uji:
+3. Kalau budget terbatas, rekomendasinya apa?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m7", title: "Coba tulis surat service dan catat di app", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Soal Uji:
 1. Ada customer bawa DVR untuk diservis. Tulis surat service-nya sekarang [kasih data dummy: nama, HP, keluhan].
-2. Setelah ditulis, catat di app. Tunjukkan hasilnya.", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m8", title: "Coba buat tanda terima", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Soal Uji:
+2. Setelah ditulis, catat di app. Tunjukkan hasilnya.`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m8", title: "Coba buat tanda terima", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Soal Uji:
 1. Customer beli 1 NVR + 4 kamera, bayar tunai. Buat tanda terimanya sekarang.
-2. Apa saja yang harus ada di tanda terima?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m9", title: "Cara Stock Opname", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Soal Uji:
+2. Apa saja yang harus ada di tanda terima?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m9", title: "Cara Stock Opname", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Soal Uji:
 1. Jelaskan langkah stock opname dari awal sampai selesai.
 2. Kalau stok fisik tidak sama dengan sistem, apa yang dilakukan?
-3. Kapan biasanya stock opname dilakukan?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m10", title: "Cara info sales mana yang harus dihapus", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Soal Uji:
+3. Kapan biasanya stock opname dilakukan?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m10", title: "Cara info sales mana yang harus dihapus", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Soal Uji:
 1. Tunjukkan di mana lihat daftar info sales.
-2. Bagaimana cara tahu mana yang sudah kedaluwarsa atau harus dihapus?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m11", title: "Coba buat tanda terima pembayaran", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Soal Uji:
+2. Bagaimana cara tahu mana yang sudah kedaluwarsa atau harus dihapus?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m11", title: "Coba buat tanda terima pembayaran", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Soal Uji:
 1. Customer bayar DP Rp500.000 untuk instalasi. Buat tanda terima pembayarannya.
-2. Apa bedanya tanda terima barang dengan tanda terima pembayaran?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m12", title: "Cara kasih harga", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Langsung kirim harga via chat selama:
+2. Apa bedanya tanda terima barang dengan tanda terima pembayaran?`, createdAt: "2026-01-15T08:00:00.000Z" },
 
-      
+{ id: "m12", title: "Cara kasih harga", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Langsung kirim harga via chat selama:
 
-        • Tidak minta total harga
-
-        • Tidak minta penawaran resmi
-
-        • Tanpa jasa instalasi
-
-        • Tanpa barang dengan alternatif lain
+• Tidak minta total harga
+• Tidak minta penawaran resmi
+• Tanpa jasa instalasi
+• Tanpa barang dengan alternatif lain
 
 Soal Uji:
-1. Skenario A: Customer tanya \"berapa harga kamera dome 2MP?\" — kamu jawab gimana?
-2. Skenario B: Customer tanya \"buatin penawaran lengkap 8 kamera + instalasi\" — perlu buat penawaran atau tidak?
-3. Skenario C: Customer tanya total harga 4 kamera + NVR — langsung jawab atau buat penawaran?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m13", title: "Cara buat penawaran", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Soal Uji:
+1. Skenario A: Customer tanya "berapa harga kamera dome 2MP?" — kamu jawab gimana?
+2. Skenario B: Customer tanya "buatin penawaran lengkap 8 kamera + instalasi" — perlu buat penawaran atau tidak?
+3. Skenario C: Customer tanya total harga 4 kamera + NVR — langsung jawab atau buat penawaran?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m13", title: "Cara buat penawaran", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Soal Uji:
 1. Buat penawaran untuk: 8 kamera IP 2MP outdoor + 1 NVR 8CH + instalasi [kasih data dummy].
 2. Apa saja yang harus ada di penawaran resmi?
-3. Setelah penawaran jadi, dikirim ke customer lewat mana?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m14", title: "Cara undian, post IG, dan review Google Maps", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Soal Uji:
+3. Setelah penawaran jadi, dikirim ke customer lewat mana?`, createdAt: "2026-01-15T08:00:00.000Z" },
+ 
+{ id: "m14", title: "Cara undian, post IG, dan review Google Maps", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Soal Uji:
 1. Jelaskan alur undian dari awal sampai pengumuman pemenang.
 2. Buat 1 caption post IG untuk promo sekarang [kasih tema].
-3. Bagaimana cara minta customer review di Google Maps?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m15", title: "Cara update produk di website i1", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Soal Uji:
+3. Bagaimana cara minta customer review di Google Maps?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m15", title: "Cara update produk di website i1", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Soal Uji:
 1. Tambahkan produk dummy ini ke website sekarang [kasih nama + foto + harga dummy].
-2. Kalau ada produk yang discontinued, apa yang dilakukan di website?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m16", title: "Cara Penjadwalan teknisi", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Soal Uji:
+2. Kalau ada produk yang discontinued, apa yang dilakukan di website?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m16", title: "Cara Penjadwalan teknisi", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Soal Uji:
 1. Ada 3 order instalasi masuk hari Senin. Bagaimana cara jadwalkan teknisinya?
 2. Di mana mencatat jadwal teknisi?
-3. Kalau teknisi tidak bisa, apa yang dilakukan?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m17", title: "Belajar catat kas", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Soal Uji:
+3. Kalau teknisi tidak bisa, apa yang dilakukan?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m17", title: "Belajar catat kas", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Soal Uji:
 1. Catat pengeluaran kas kecil Rp50.000 untuk beli isolasi sekarang.
 2. Ada 4 dompet kas — sebutkan nama-namanya dan bedanya.
-3. Bagaimana cara lihat saldo kas hari ini?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m18", title: "Coba buat CRM di aplikasi AppSheet", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Soal Uji:
+3. Bagaimana cara lihat saldo kas hari ini?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m18", title: "Coba buat CRM di aplikasi AppSheet", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Soal Uji:
 1. Tambahkan data customer baru ini ke CRM AppSheet [kasih data dummy].
 2. Bagaimana cara lihat history follow-up customer?
-3. Kalau customer sudah closing, statusnya diubah jadi apa?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m19", title: "Bikin voucher cashback di IPC CCTV (Asmi)", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Soal Uji:
+3. Kalau customer sudah closing, statusnya diubah jadi apa?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m19", title: "Bikin voucher cashback di IPC CCTV (Asmi)", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Soal Uji:
 1. Buat voucher cashback untuk promo minggu ini di IPC CCTV.
-2. Apa syarat yang harus dipenuhi customer untuk dapat cashback?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m20", title: "Design poster promo", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Soal Uji:
+2. Apa syarat yang harus dipenuhi customer untuk dapat cashback?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m20", title: "Design poster promo", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Soal Uji:
 1. Buat 1 poster promo sederhana untuk produk ini [kasih tema/produk].
-2. Apa saja elemen yang harus ada di poster promo i1?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m21", title: "Coba cek tulisan bahasa Inggris", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Kosakata: progress, customer, DVR/NVR, installation, setting online, invoice, purchase, stock, delivery, packing, varifocal, optical zoom, settlement, initialize, follow up, maintenance, reset default, notification, attachment, dll.
+2. Apa saja elemen yang harus ada di poster promo i1?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m21", title: "Coba cek tulisan bahasa Inggris", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Kosakata: progress, customer, DVR/NVR, installation, setting online, invoice, purchase, stock, delivery, packing, varifocal, optical zoom, settlement, initialize, follow up, maintenance, reset default, notification, attachment, dll.
 
 Soal Uji:
 1. Tunjuk 10 kata dari daftar secara acak, minta artikan satu per satu.
-2. \"Tombol ini tulisannya initialize — artinya apa, kamu tekan atau tidak?\"
-3. \"Di aplikasi ada tulisan follow up overdue — maksudnya apa?\"", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m22", title: "Link ITC Trade", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Soal Uji:
+2. 'Tombol ini tulisannya initialize — artinya apa, kamu tekan atau tidak?'
+3. 'Di aplikasi ada tulisan follow up overdue — maksudnya apa?'`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m22", title: "Link ITC Trade", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Soal Uji:
 1. Buka ITC Trade sekarang, tunjukkan caranya.
-2. Untuk apa ITC Trade digunakan di i1?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m23", title: "Cara update list kabel", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: "Soal Uji:
+2. Untuk apa ITC Trade digunakan di i1?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m23", title: "Cara update list kabel", category: "Admin", section: "ADMINISTRASI & OPERASIONAL", content: `Soal Uji:
 1. Kabel RG59 baru datang 500 meter. Update di list sekarang.
-2. Di mana list kabel disimpan/diakses?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m24", title: "Bedanya TVI CVI AHD PAL & 4IN1", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: "TVI: FHD | AHD: HD | CVI: 2MP LTE | PAL | 4IN1
+2. Di mana list kabel disimpan/diakses?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m24", title: "Bedanya TVI CVI AHD PAL & 4IN1", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: `TVI: FHD | AHD: HD | CVI: 2MP LTE | PAL | 4IN1
 
 Soal Uji:
-1. DVR ini tulisannya \"4IN1\" — artinya apa?
+1. DVR ini tulisannya '4IN1' — artinya apa?
 2. Bedanya TVI dan AHD dari sisi kualitas gambar?
-3. Camera analog biasa itu pakai format apa?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m25", title: "2K 3K (resolusi kamera)", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: "2K = 3MP | 2K+ = 4MP | 3K = 5MP
+3. Camera analog biasa itu pakai format apa?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m25", title: "2K 3K (resolusi kamera)", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: `2K = 3MP | 2K+ = 4MP | 3K = 5MP
 
 Soal Uji:
-1. Customer tanya \"kamera 2K itu berapa MP?\" — jawabnya apa?
+1. Customer tanya 'kamera 2K itu berapa MP?' — jawabnya apa?
 2. Apa bedanya 2K dengan 2K+?
-3. Kalau customer minta 5MP, di katalog dicari dengan label apa?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m26", title: "Soal HDD MFI vs Non-MFI, HDD Computer vs HDD CCTV", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: "Soal Uji:
+3. Kalau customer minta 5MP, di katalog dicari dengan label apa?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m26", title: "Soal HDD MFI vs Non-MFI, HDD Computer vs HDD CCTV", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: `Soal Uji:
 1. Apa itu HDD MFI? Bedanya dengan non-MFI?
 2. Boleh tidak pakai HDD laptop biasa di DVR? Kenapa?
-3. Customer bawa HDD komputer minta dipasang di NVR — kamu bilang apa?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m27", title: "Pelajarin EXIR, LUX, ICR, WDR, F, 3D DNR", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: "Soal Uji:
+3. Customer bawa HDD komputer minta dipasang di NVR — kamu bilang apa?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m27", title: "Pelajarin EXIR, LUX, ICR, WDR, F, 3D DNR", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: `Soal Uji:
 1. Apa itu EXIR? Bedanya dengan IR biasa?
-2. Customer tanya \"kamera ini bisa malam tidak?\" — fitur apa yang dilihat?
+2. Customer tanya 'kamera ini bisa malam tidak?' — fitur apa yang dilihat?
 3. WDR itu untuk kondisi cahaya seperti apa?
-4. ICR otomatis bekerja kapan?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m28", title: "Watt CCTV", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: "NVR 16CH: 15W | NVR 4CH + Switch PoE 4 port: 80W | NVR 8CH + Switch PoE 8 port: 135W | NVR 16CH + 2 Switch PoE 8 port: 255W
+4. ICR otomatis bekerja kapan?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m28", title: "Watt CCTV", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: `NVR 16CH: 15W | NVR 4CH + Switch PoE 4 port: 80W | NVR 8CH + Switch PoE 8 port: 135W | NVR 16CH + 2 Switch PoE 8 port: 255W
 
 Soal Uji:
 1. Pasang NVR 8CH + switch PoE 8 port — butuh UPS berapa watt minimal?
 2. Kenapa perlu tahu total watt sebelum instalasi?
-3. NVR 16CH doank tanpa switch, konsumsinya berapa watt?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m29", title: "Bedanya Gigabits dengan GigaBytes", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: "1 GigaByte = 8 Gigabits | Switch Gigabits = 128Mbps | 2MP butuh min 2Mbps
+3. NVR 16CH doank tanpa switch, konsumsinya berapa watt?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m29", title: "Bedanya Gigabits dengan GigaBytes", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: `1 GigaByte = 8 Gigabits | Switch Gigabits = 128Mbps | 2MP butuh min 2Mbps
 
 Soal Uji:
 1. Internet 10Mbps — bisa handle berapa kamera 2MP secara online?
-2. \"Switch gigabit\" artinya kecepatannya berapa Mbps?
-3. HDD 1TB itu sama dengan berapa GB?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m30", title: "Bedanya camera IP, analog, dan wireless", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: "Ada 1 attachment gambar
+2. 'Switch gigabit' artinya kecepatannya berapa Mbps?
+3. HDD 1TB itu sama dengan berapa GB?`, createdAt: "2026-01-15T08:00:00.000Z" },
 
+ { id: "m30", title: "Bedanya camera IP, analog, dan wireless", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: `Ada 1 attachment gambar
 Soal Uji:
 1. Tunjukkan 3 kamera ini [kasih fisik/foto] — mana yang IP, analog, wireless?
 2. Kelebihan kamera IP dibanding analog?
-3. Customer mau pasang kamera di tempat yang susah tarik kabel — rekomendasinya apa?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m31", title: "Cara baca hasil survey", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: "Cek: tinggi plafon, lokasi titik, jumlah in/out, plafon/luar, kebutuhan kabel, lokasi DVR, power supply, jam rekam, fitur audio/colorvu, harga material, jumlah monitor
+3. Customer mau pasang kamera di tempat yang susah tarik kabel — rekomendasinya apa?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m31", title: "Cara baca hasil survey", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: `Cek: tinggi plafon, lokasi titik, jumlah in/out, plafon/luar, kebutuhan kabel, lokasi DVR, power supply, jam rekam, fitur audio/colorvu, harga material, jumlah monitor
 
 Soal Uji:
 1. Saya kasih hasil survey [kasih lembar survey dummy] — apa saja yang perlu dicek sudah lengkap atau belum?
 2. Dari hasil survey ini, kira-kira butuh berapa meter kabel?
-3. Kalau tidak tahu tinggi plafon saat survey, akibatnya apa?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m32", title: "Cara hitung pipa dan material lainnya", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: "1 pipa = 3m | 1 pipa = 1 sock | 1 pipa = 2–3 klam
+3. Kalau tidak tahu tinggi plafon saat survey, akibatnya apa?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m32", title: "Cara hitung pipa dan material lainnya", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: `1 pipa = 3m | 1 pipa = 1 sock | 1 pipa = 2–3 klam
 
 Soal Uji:
 1. Total kabel 600 meter — butuh berapa pipa, sock, dan klam?
-2. Kenapa jumlah pipa aktual bisa lebih sedikit dari hitungan?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m33", title: "Disclaimer service CCTV", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: "Infokan risiko pindah titik sebelum pengerjaan
+2. Kenapa jumlah pipa aktual bisa lebih sedikit dari hitungan?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m33", title: "Disclaimer service CCTV", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: `Infokan risiko pindah titik sebelum pengerjaan
 
 Soal Uji:
 1. Customer minta pindahkan 4 kamera ke lokasi baru. Apa yang kamu sampaikan dulu sebelum setuju?
 2. Sebutkan minimal 2 risiko yang harus diinfokan ke customer.
-3. Kalau customer tidak mau tanda tangan disclaimer — kamu tetap kerjakan atau tidak?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m34", title: "List isi barang-barang paket analog dan IP", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: "Soal Uji:
+3. Kalau customer tidak mau tanda tangan disclaimer — kamu tetap kerjakan atau tidak?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m34", title: "List isi barang-barang paket analog dan IP", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: `Soal Uji:
 1. Sebutkan isi paket analog 4 kamera standar.
 2. Apa bedanya isi paket IP vs analog?
-3. Customer order paket 8 kamera IP — apa saja yang harus disiapkan sebelum dikirim?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m35", title: "Cek watt UPS APC", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: "Soal Uji:
+3. Customer order paket 8 kamera IP — apa saja yang harus disiapkan sebelum dikirim?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m35", title: "Cek watt UPS APC", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: `Soal Uji:
 1. Instalasi NVR 8CH + switch PoE 8 port — pilih UPS APC yang mana dari stok?
-2. Berapa lama backup time UPS ini kalau listrik mati?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m36", title: "Cek MAC Address (pabrik mana)", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: "wireshark.org/tools/oui-lookup.html
+2. Berapa lama backup time UPS ini kalau listrik mati?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m36", title: "Cek MAC Address (pabrik mana)", category: "Materi", section: "PENGETAHUAN PRODUK & TEKNIS DASAR", content: `wireshark.org/tools/oui-lookup.html
 
 Soal Uji:
 1. Cek MAC address ini [kasih contoh MAC] — pabrik mana?
-2. Kapan kamu perlu cek MAC address saat kerja?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m37", title: "Cara packing", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Kapan kamu perlu cek MAC address saat kerja?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m37", title: "Cara packing", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Pack order ini sekarang [kasih 1 set barang]: 1 kamera dome + 1 adaptor + kabel.
-2. Barang fragile seperti kamera dikemas bagaimana biar tidak rusak?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m38", title: "Cara buat kabel jadi RG+Power", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Barang fragile seperti kamera dikemas bagaimana biar tidak rusak?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m38", title: "Cara buat kabel jadi RG+Power", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Buat 1 kabel RG+Power sepanjang 2 meter sekarang.
-2. Alat apa saja yang dibutuhkan?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m39", title: "Buat kabel LAN", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Alat apa saja yang dibutuhkan?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m39", title: "Buat kabel LAN", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Buat kabel LAN straight-through 1 meter sekarang.
 2. Urutan warna kabel LAN standar T568B apa?
-3. Test pakai LAN tester — hasilnya harus seperti apa?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m40", title: "Cara test power supply / adaptor", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+3. Test pakai LAN tester — hasilnya harus seperti apa?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m40", title: "Cara test power supply / adaptor", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Test adaptor 12V ini — hidup atau mati? Tunjukkan caranya.
-2. Kalau tegangan keluar 9V padahal harusnya 12V — berarti apa?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m41", title: "Cara pasang HDD", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Kalau tegangan keluar 9V padahal harusnya 12V — berarti apa?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m41", title: "Cara pasang HDD", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Pasang HDD ini ke DVR/NVR yang ada sekarang.
 2. Setelah terpasang, apa langkah pertama yang dilakukan di menu?
-3. Kenapa HDD perlu di-initialize dulu?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m42", title: "Cara bongkar pasang & arahin camera CCTV indoor dan outdoor", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+3. Kenapa HDD perlu di-initialize dulu?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m42", title: "Cara bongkar pasang & arahin camera CCTV indoor dan outdoor", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Bongkar dan pasang kembali kamera dome ini.
 2. Arahin kamera supaya sudut pandangnya ke arah pintu.
-3. Bedanya cara pasang kamera outdoor vs indoor?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m43", title: "Cara Rapiin barang-barang di rak", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+3. Bedanya cara pasang kamera outdoor vs indoor?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m43", title: "Cara Rapiin barang-barang di rak", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Rapikan rak ini [tunjuk rak yang berantakan] sesuai standar i1.
-2. Barang apa yang harus dipisah? Kenapa?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m44", title: "Cara Tandai kabel jadi dan cek meterannya", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Barang apa yang harus dipisah? Kenapa?`, createdAt: "2026-01-15T08:00:00.000Z" },
+   
+{ id: "m44", title: "Cara Tandai kabel jadi", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Tandai kabel ini 50 meter sekarang — tunjukkan caranya.
-2. Kenapa kabel perlu ditandai sebelum dikirim?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m45", title: "Cara cek lama rekaman micro SD dan HDD", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Kenapa kabel perlu ditandai sebelum dikirim?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m45", title: "Cara cek lama rekaman micro SD dan HDD", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. DVR dengan HDD 1TB, 4 kamera 2MP — rekaman bisa sampai berapa hari?
-2. Tunjukkan di menu DVR cara cek kapasitas dan sisa rekaman.", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m46", title: "Kasih tau lokasi alamat kurir-kurir", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Tunjukkan di menu DVR cara cek kapasitas dan sisa rekaman.`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m46", title: "Kasih tau lokasi alamat kurir-kurir", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Sebutkan nama dan alamat kurir yang digunakan i1.
-2. Kalau customer minta JNE, drop-off-nya di mana?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m47", title: "Cara setting camera IP ke NVR/DVR", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Kalau customer minta JNE, drop-off-nya di mana?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m47", title: "Cara setting camera IP ke NVR/DVR", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Tambahkan kamera IP ini ke NVR yang sudah menyala sekarang.
-2. Kalau kamera tidak auto-detected, langkah manualnya bagaimana?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m48", title: "Cara setting IP camera Dahua ke NVR", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Kalau kamera tidak auto-detected, langkah manualnya bagaimana?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m48", title: "Cara setting IP camera Dahua ke NVR", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. NVR Dahua baru, belum ada kamera. Setting dari awal sampai kamera connect.
-2. Kalau kamera perlu di-reset dulu, caranya bagaimana?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m49", title: "Cara upgrade firmware DVR/NVR", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Download dari hikvision.com / avtech.tw → flash disk → Maintenance → Upgrade
+2. Kalau kamera perlu di-reset dulu, caranya bagaimana?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m49", title: "Cara upgrade firmware DVR/NVR", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Download dari hikvision.com / avtech.tw → flash disk → Maintenance → Upgrade
 
 Soal Uji:
 1. DVR Avtech tipe ini [kasih tipe] — download firmware-nya dari mana?
 2. Setelah file di flash disk, langkah selanjutnya di menu DVR apa?
-3. Apa yang terjadi kalau listrik mati saat upgrade berlangsung?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m50", title: "Cara setting camera wireless ke DVR", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+3. Apa yang terjadi kalau listrik mati saat upgrade berlangsung?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m50", title: "Cara setting camera wireless ke DVR", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Tambahkan kamera wireless ini ke DVR yang ada.
-2. Kalau kamera wireless tidak connect, troubleshoot-nya dari mana dulu?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m51", title: "Cara setting Colorvu dan audio", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Kalau kamera wireless tidak connect, troubleshoot-nya dari mana dulu?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m51", title: "Cara setting Colorvu dan audio", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Aktifkan fitur Colorvu di kamera ini — tunjukkan caranya.
 2. Aktifkan audio recording di DVR/NVR.
-3. Colorvu berbeda dengan kamera biasa dalam kondisi apa?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m52", title: "Cara matiin notif DVR Hikvision bunyi-bunyi terus", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Menu → Setting → Exception → HDD Full → All → Apply
+3. Colorvu berbeda dengan kamera biasa dalam kondisi apa?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m52", title: "Cara matiin notif DVR Hikvision bunyi-bunyi terus", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Menu → Setting → Exception → HDD Full → All → Apply
 
 Soal Uji:
 1. DVR ini bunyi terus — matikan notifnya sekarang tanpa dibantu.
-2. Kenapa bunyi itu muncul? Artinya apa?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m53", title: "Cara ganti IP dari komputer (SADP Tool / Config Tool)", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Colok LAN → buka Config Tool → web browser → Setting → Network → ganti IP → save → verifikasi
+2. Kenapa bunyi itu muncul? Artinya apa?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m53", title: "Cara ganti IP dari komputer (SADP Tool / Config Tool)", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Colok LAN → buka Config Tool → web browser → Setting → Network → ganti IP → save → verifikasi
 
 Soal Uji:
 1. Ganti IP kamera ini dari 192.168.1.64 ke 192.168.1.100 sekarang.
-2. Bagaimana verifikasi IP sudah berubah?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m54", title: "Cek IP tanpa SADP Tool", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "CMD → arp -a
+2. Bagaimana verifikasi IP sudah berubah?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m54", title: "Cek IP tanpa SADP Tool", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `CMD → arp -a
 
 Soal Uji:
 1. Tidak ada SADP Tool di komputer ini — cari IP kamera yang terhubung sekarang.
-2. Dari hasil arp -a, bagaimana tahu mana yang IP kamera?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m55", title: "DVR ke IVMS dan web", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Dari hasil arp -a, bagaimana tahu mana yang IP kamera?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m55", title: "DVR ke IVMS dan web", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Tambahkan DVR ini ke iVMS-4200 di laptop.
 2. Akses DVR lewat web browser — langkah-langkahnya apa?
-3. Bedanya akses via iVMS vs web browser?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m56", title: "Belajar mesin absen yang face", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+3. Bedanya akses via iVMS vs web browser?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m56", title: "Belajar mesin absen yang face", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Daftarkan wajah saya ke mesin absen ini sekarang.
 2. Kalau wajah tidak terdeteksi — troubleshoot-nya dari mana?
-3. Bagaimana cara lihat log absensi?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m57", title: "Pelajarin X107 buat akses kontrol & absen", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Download Software Attendance Management v4.8.11
+3. Bagaimana cara lihat log absensi?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m57", title: "Pelajarin X107 buat akses kontrol & absen", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Download Software Attendance Management v4.8.11
 
 Soal Uji:
 1. Buka software X107, tambahkan 1 karyawan dummy.
 2. Export laporan absensi bulan ini.
-3. Kalau perangkat tidak terdeteksi di software, cek apa dulu?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m58", title: "Belajar akses door (exit button, akses kontrol, m lock, dropbolt)", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+3. Kalau perangkat tidak terdeteksi di software, cek apa dulu?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m58", title: "Belajar akses door (exit button, akses kontrol, m lock, dropbolt)", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Jelaskan fungsi exit button, m lock, dan dropbolt — apa bedanya?
-2. Kalau pintu tidak bisa dibuka dari dalam — komponen mana yang dicek pertama?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m59", title: "Test buka pintu pakai aplikasi HIK-CONNECT", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Kalau pintu tidak bisa dibuka dari dalam — komponen mana yang dicek pertama?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m59", title: "Test buka pintu pakai aplikasi HIK-CONNECT", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Buka pintu yang sudah terhubung ke Hik-Connect dari HP sekarang.
-2. Kalau pintu tidak merespons dari aplikasi — troubleshoot-nya bagaimana?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m60", title: "Belajar balun", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Kalau pintu tidak merespons dari aplikasi — troubleshoot-nya bagaimana?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m60", title: "Belajar balun", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Apa itu balun dan kapan digunakan?
-2. Pasang balun ke kamera analog dan DVR — tunjukkan caranya.", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m61", title: "Coba setting intercom", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Pasang balun ke kamera analog dan DVR — tunjukkan caranya.`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m61", title: "Coba setting intercom", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Setting intercom ini supaya bisa bicara dua arah.
-2. Coba panggil dari outdoor unit ke indoor unit.", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m62", title: "Switch manage", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Coba panggil dari outdoor unit ke indoor unit.`, createdAt: "2026-01-15T08:00:00.000Z" },
+ 
+{ id: "m62", title: "Switch manage", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Akses halaman manajemen switch ini dari browser.
 2. Cek port mana yang aktif dan mana yang mati.
-3. Bedanya switch managed vs unmanaged?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m63", title: "Hik Connect Team", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "hik-connect.com portal
-
+3. Bedanya switch managed vs unmanaged?`, createdAt: "2026-01-15T08:00:00.000Z" },
+   
+{ id: "m63", title: "Hik Connect Team", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `hik-connect.com portal
 Soal Uji:
 1. Login ke Hik-Connect Team sekarang.
 2. Tambahkan device baru ke akun team.
-3. Bedanya Hik-Connect personal vs team?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m64", title: "Test bikin akun di Hik-Connect, EZVIZ, dan Eagle Eyes", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+3. Bedanya Hik-Connect personal vs team?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m64", title: "Test bikin akun di Hik-Connect, EZVIZ, dan Eagle Eyes", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Buat akun baru di Hik-Connect pakai email dummy sekarang.
 2. Buat akun EZVIZ. Apa bedanya cara register EZVIZ vs Hik-Connect?
-3. Eagle Eyes digunakan untuk brand apa?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m65", title: "EZVIZ ADVANCED SETTING", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "m-support.ezviz.com/faq/171
+3. Eagle Eyes digunakan untuk brand apa?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m65", title: "EZVIZ ADVANCED SETTING", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `m-support.ezviz.com/faq/171
 
 Soal Uji:
 1. Buka advanced setting kamera EZVIZ di laptop — tunjukkan caranya.
-2. Ubah resolusi rekaman dari menu advanced setting.", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m66", title: "Unbind Ezviz", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Minta customer isi: email, HP, SN device
+2. Ubah resolusi rekaman dari menu advanced setting.`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m66", title: "Unbind Ezviz", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Minta customer isi: email, HP, SN device
 
 Soal Uji:
 1. Skenario: customer chat minta unbind EZVIZ, tidak bisa akses email lama. Apa yang kamu minta ke customer?
-2. Data apa saja yang wajib dikirim customer sebelum diproses?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m67", title: "Unbind Hikvision", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Via Hik-Partner Pro → daftar perusahaan → ikuti tutorial
+2. Data apa saja yang wajib dikirim customer sebelum diproses?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m67", title: "Unbind Hikvision", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Via Hik-Partner Pro → daftar perusahaan → ikuti tutorial
 
 Soal Uji:
 1. Aplikasi apa yang dipakai untuk unbind Hikvision?
 2. Apa syarat bisa melakukan unbind Hikvision?
-3. Bedanya proses unbind Hikvision vs EZVIZ?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m68", title: "Coba pakai Ultra Viewer / Any Dash", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
-1. Remote komputer saya sekarang menggunakan Ultra Viewer.
-2. Kapan Ultra Viewer digunakan dalam pekerjaan?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m69", title: "Cara setting router", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Access point: penguat sinyal via kabel | Router: jaringan baru | Extender: penguat via WiFi
+3. Bedanya proses unbind Hikvision vs EZVIZ?`, createdAt: "2026-01-15T08:00:00.000Z" },
 
+{ id: "m68", title: "Coba pakai Ultra Viewer / Any Dash", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
+1. Remote komputer saya sekarang menggunakan Ultra Viewer.
+2. Kapan Ultra Viewer digunakan dalam pekerjaan?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m69", title: "Cara setting router", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Access point: penguat sinyal via kabel | Router: jaringan baru | Extender: penguat via WiFi
 Soal Uji:
 1. Customer minta pasang WiFi di kantor — butuh router, AP, atau extender? Jelaskan bedanya.
-2. Setting router ini supaya bisa connect ke internet.", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m70", title: "Tutorial mikrotik", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Download Winbox | Artikel referensi
+2. Setting router ini supaya bisa connect ke internet.`, createdAt: "2026-01-15T08:00:00.000Z" },
 
+{ id: "m70", title: "Tutorial mikrotik", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Download Winbox | Artikel referensi
 Soal Uji:
 1. Buka Winbox dan connect ke Mikrotik yang ada.
 2. Cek IP yang sedang dipakai di Mikrotik ini.
-3. Buat Hotspot baru di interface yang saya tunjuk.", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m71", title: "Belajar mikrotik (lanjutan)", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "IP range 192.168.200.x | Gateway .1 | Hotspot setup | Disable wifi managed capsman
+3. Buat Hotspot baru di interface yang saya tunjuk.`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m71", title: "Belajar mikrotik (lanjutan)", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `IP range 192.168.200.x | Gateway .1 | Hotspot setup | Disable wifi managed capsman
 
 Soal Uji:
 1. Cek config IP Mikrotik ini lewat CMD.
-2. Disable WiFi yang managed by CAPsMAN — tunjukkan caranya.", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m72", title: "Coba HCP", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Disable WiFi yang managed by CAPsMAN — tunjukkan caranya.`, createdAt: "2026-01-15T08:00:00.000Z" },
+   
+{ id: "m72", title: "Coba HCP", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Buka dan login ke HCP sekarang.
-2. Untuk apa HCP digunakan?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m73", title: "Test signage lewat laptop", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Untuk apa HCP digunakan?`, createdAt: "2026-01-15T08:00:00.000Z" },
+   
+{ id: "m73", title: "Test signage lewat laptop", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Tampilkan konten ke display signage dari laptop ini.
-2. Kalau layar signage tidak menampilkan konten — cek apa dulu?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m74", title: "Ganti PSU jaringan yang di PSU box", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Kalau layar signage tidak menampilkan konten — cek apa dulu?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m74", title: "Ganti PSU jaringan yang di PSU box", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. PSU di box ini mati — ganti sekarang dengan yang baru.
-2. Apa yang harus diperhatikan sebelum ganti PSU agar tidak korslet?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m75", title: "Philsat setting online ubah port ke 34567", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Apa yang harus diperhatikan sebelum ganti PSU agar tidak korslet?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m75", title: "Philsat setting online ubah port ke 34567", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. DVR Philsat ini belum bisa online — ubah portnya ke 34567, tunjukkan caranya.
-2. Setelah port diubah, bagaimana verifikasi sudah online?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m76", title: "Panel albox", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Setelah port diubah, bagaimana verifikasi sudah online?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m76", title: "Panel albox", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Apa itu panel albox dan fungsinya?
-2. Tunjukkan cara memasang komponen ke dalam albox.", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m77", title: "Cobain wireless control panel kit alarm", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Tunjukkan cara memasang komponen ke dalam albox.`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m77", title: "Cobain wireless control panel kit alarm", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Pasang dan aktifkan sensor alarm wireless ini ke panel.
-2. Test trigger alarm — berhasil bunyi atau tidak?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m78", title: "Fiber optic", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+2. Test trigger alarm — berhasil bunyi atau tidak?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m78", title: "Fiber optic", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Apa kelebihan kabel fiber optic dibanding kabel UTP untuk CCTV?
 2. Kapan rekomendasikan fiber ke customer?
-3. Alat apa yang dibutuhkan untuk splicing fiber?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m79", title: "HIK-CONNECT di Smart TV", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: "Soal Uji:
+3. Alat apa yang dibutuhkan untuk splicing fiber?`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m79", title: "HIK-CONNECT di Smart TV", category: "Teknis", section: "TEKNIS LAPANGAN & INSTALASI", content: `Soal Uji:
 1. Install dan login Hik-Connect di Smart TV ini.
-2. Tampilkan live view kamera dari Smart TV.", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m80", title: "Video Tutorial AVTECH", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: "Setting online DVR – YT Link
-        Backup rekaman – YT Link
-        Buka playback – YT Link
-        Install HDD – YT Link
-        Setting online di HP – YT Link
-        Reset DVR – YT Link
-        Setting camera IP – YT Link
+2. Tampilkan live view kamera dari Smart TV.`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m80", title: "Video Tutorial AVTECH", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: `Setting online DVR – YT Link
+Backup rekaman – YT Link
+Buka playback – YT Link
+Install HDD – YT Link
+Setting online di HP – YT Link
+Reset DVR – YT Link
+Setting camera IP – YT Link
 
 Soal Uji:
 1. DVR AVTECH ini belum online — setting dari awal sampai bisa dipantau di HP.
 2. Backup rekaman tanggal kemarin ke flash disk.
-3. Reset DVR ke pengaturan pabrik — lakukan sekarang.", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m81", title: "Video tutorial EZVIZ", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: "Setting online | Reset password akun & kamera | Share device | Alarm notifikasi | Kamera offline | Cloud storage
+3. Reset DVR ke pengaturan pabrik — lakukan sekarang.`, createdAt: "2026-01-15T08:00:00.000Z" },
 
-      Setting online | Reset pw akun | Reset pw kamera | Share device
-
+{ id: "m81", title: "Video tutorial EZVIZ", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: `Setting online | Reset password akun & kamera | Share device | Alarm notifikasi | Kamera offline | Cloud storage
+Setting online | Reset pw akun | Reset pw kamera | Share device
 Soal Uji:
 1. Kamera EZVIZ ini belum online — setting sampai bisa dilihat di aplikasi.
 2. Share device kamera ini ke akun saya.
 3. Customer lupa password akun EZVIZ — bantu reset.
-4. Kamera sering offline — cek dan jelaskan kemungkinan penyebabnya.", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m82", title: "Video tutorial Dahua", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: "Setting online XVR | Backup rekaman | Playback | Install HDD | Online di HP | Setting camera IP | Reset XVR
+4. Kamera sering offline — cek dan jelaskan kemungkinan penyebabnya.`, createdAt: "2026-01-15T08:00:00.000Z" },
 
+{ id: "m82", title: "Video tutorial Dahua", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: `Setting online XVR | Backup rekaman | Playback | Install HDD | Online di HP | Setting camera IP | Reset XVR
 Soal Uji:
 1. XVR Dahua ini belum bisa online di HP — setting sampai bisa.
 2. Buka playback rekaman jam 10 pagi tadi.
-3. Backup rekaman 1 jam ke flash disk.", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m83", title: "Video Tutorial Absensi Hikvision", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: "Add device ke PC/HCAC/Hik-Connect Teams | Person Management | Shift & Schedule | Overnight Shift | Report
+3. Backup rekaman 1 jam ke flash disk.`, createdAt: "2026-01-15T08:00:00.000Z" },
 
-      Add device PC | HCAC | Shift & Schedule
-
+{ id: "m83", title: "Video Tutorial Absensi Hikvision", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: `Add device ke PC/HCAC/Hik-Connect Teams | Person Management | Shift & Schedule | Overnight Shift | Report
+Add device PC | HCAC | Shift & Schedule
 Soal Uji:
 1. Daftarkan mesin absen Hikvision ini ke PC.
 2. Tambahkan 1 karyawan dummy beserta jadwal shiftnya.
-3. Tarik laporan absensi bulan ini.", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m84", title: "Video tutorial HIKVISION", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: "Checklist 0/8: Buka playback | Export rekaman | Initialize HDD | Setting camera IP | Setting online | Reset DVR | Add ke HP | Add ke iVMS 4200
+3. Tarik laporan absensi bulan ini.`, createdAt: "2026-01-15T08:00:00.000Z" },
 
-      Tutorial setting online DVR
-
+{ id: "m84", title: "Video tutorial HIKVISION", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: `Checklist 0/8: Buka playback | Export rekaman | Initialize HDD | Setting camera IP | Setting online | Reset DVR | Add ke HP | Add ke iVMS 4200
+Tutorial setting online DVR
 Soal Uji:
 1. Initialize HDD yang baru dipasang di DVR Hikvision ini.
 2. Setting online DVR sampai bisa dipantau dari iVMS-4200.
 3. Export rekaman 30 menit terakhir ke flash disk.
-4. Tambahkan DVR ini ke aplikasi HP via Hik-Connect.", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m85", title: "Video Tutorial Tiandy", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: "Setting online NVR | Setting ke HP | Record & playback | Backup | Reset password | Setting ke laptop
+4. Tambahkan DVR ini ke aplikasi HP via Hik-Connect.`, createdAt: "2026-01-15T08:00:00.000Z" },
 
+{ id: "m85", title: "Video Tutorial Tiandy", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: `Setting online NVR | Setting ke HP | Record & playback | Backup | Reset password | Setting ke laptop
 Soal Uji:
 1. Setting NVR Tiandy ini supaya bisa online di HP.
 2. Lupa password NVR Tiandy — reset sekarang.
-3. Buka playback dan backup rekaman 1 jam ke flash disk.", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m86", title: "Video tutorial Avaro", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: "Soal Uji:
-1. Setting NVR/DVR Avaro ini supaya bisa online di HP.
-2. Buka playback rekaman kemarin.", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m87", title: "Video tutorial orbit", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: "youtu.be/aDDeDQ0AqFE
+3. Buka playback dan backup rekaman 1 jam ke flash disk.`, createdAt: "2026-01-15T08:00:00.000Z" },
 
+{ id: "m86", title: "Video tutorial Avaro", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: `Soal Uji:
+1. Setting NVR/DVR Avaro ini supaya bisa online di HP.
+2. Buka playback rekaman kemarin.`, createdAt: "2026-01-15T08:00:00.000Z" },
+
+{ id: "m87", title: "Video tutorial orbit", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: `Link: youtu.be/aDDeDQ0AqFE
 Soal Uji:
 1. Setting perangkat Orbit ini online — tunjukkan caranya.
-2. Kalau device Orbit tidak terdeteksi di aplikasi, cek apa dulu?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m88", title: "Tutorial NAS QNAP", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: "youtu.be/9nhSQ5dyuF4
+2. Kalau device Orbit tidak terdeteksi di aplikasi, cek apa dulu?`, createdAt: "2026-01-15T08:00:00.000Z" },
 
+{ id: "m88", title: "Tutorial NAS QNAP", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: `Link: youtu.be/9nhSQ5dyuF4
 Soal Uji:
 1. Akses NAS QNAP ini dari browser — tunjukkan caranya.
 2. Apa kegunaan NAS untuk sistem CCTV?
-3. Bedanya simpan rekaman di NAS vs HDD lokal di DVR?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m89", title: "Tutorial ZKTeco LH6500", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: "Manual PDF: fccid.io link
+3. Bedanya simpan rekaman di NAS vs HDD lokal di DVR?`, createdAt: "2026-01-15T08:00:00.000Z" },
 
-      File PDF dari Yakobus (attachment)
+{ id: "m89", title: "Tutorial ZKTeco LH6500", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: `Manual PDF: fccid.io link
+File PDF dari Yakobus (attachment)
 
 Soal Uji:
 1. Daftarkan sidik jari saya ke ZKTeco LH6500 ini.
 2. Lihat log akses pintu dari hari ini.
-3. Reset perangkat ke pengaturan pabrik — caranya?", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m90", title: "Tutorial Ezviz L2S DoorLock", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: "YT Link 1 | YT Link 2
+3. Reset perangkat ke pengaturan pabrik — caranya?`, createdAt: "2026-01-15T08:00:00.000Z" },
 
+    { id: "m90", title: "Tutorial Ezviz L2S DoorLock", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: `YT Link 1 | YT Link 2
 Soal Uji:
 1. Pasangkan dan setting EZVIZ L2S DoorLock ini ke aplikasi EZVIZ.
 2. Tambahkan 1 PIN akses baru.
-3. Coba buka kunci dari aplikasi HP.", createdAt: "2026-01-15T08:00:00.000Z" },
-    { id: "m91", title: "Tutorial PABX (Panasonic KX-TES824)", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: "Kode: 009 (tipe ext) | 302 (tolak) | 405 (day out) | 408 (day in) | 602 (batasan dial)
+3. Coba buka kunci dari aplikasi HP.`, createdAt: "2026-01-15T08:00:00.000Z" },
 
-      Tombol: Store=simpan | Hold=back | SP-Phone=next | Flash=oper extension
-
-      Manual (page 29)
-
+    { id: "m91", title: "Tutorial PABX", category: "Tutorial", section: "VIDEO TUTORIAL PER MEREK", content: `Kode: 009 (tipe ext) | 302 (tolak) | 405 (day out) | 408 (day in)
+Tombol: Store=simpan | Hold=back | SP-Phone=next | Flash=oper extension
 Soal Uji:
-1. Masuk mode program PABX — tunjukkan caranya (tanpa dibantu).
-2. Atur extension 101 agar bunyi saat ada telepon masuk (day in).
-3. Oper telepon dari extension 101 ke 102 — caranya?
-4. Apa bedanya CO dan Jack di PABX?", createdAt: "2026-01-15T08:00:00.000Z" }
+1. Masuk mode program PABX — tunjukkan caranya.
+2. Atur extension 101 agar bunyi saat ada telepon masuk.`, createdAt: "2026-01-15T08:00:00.000Z" }
+
   ],
   progress: []
 };
 
 const STORAGE_KEY = "lms_internal_data_v2";
+const SESSION_KEY = "lms_session_id"; // Tambahkan ini jika belum ada
+let CURRENT_USER = null; // Tambahkan baris ini
 
-function loadData(){
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if(!raw){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_DATA));
-    return JSON.parse(JSON.stringify(DEFAULT_DATA));
-  }
-  try{
-    return JSON.parse(raw);
-  }catch(e){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_DATA));
-    return JSON.parse(JSON.stringify(DEFAULT_DATA));
-  }
+// Load Data
+let DB = JSON.parse(localStorage.getItem(STORAGE_KEY)) || DEFAULT_DATA;
+if (!localStorage.getItem(STORAGE_KEY)) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_DATA));
 }
 
-function saveData(data){
+function saveData(data) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  DB = data;
 }
-
-let DB = loadData();
-let CURRENT_USER = null;
-let ACTIVE_MATERIAL_ID = null;
-
-const SESSION_KEY = "lms_internal_session_v1";
 
 /* =========================================================
-   AUTH
+   FUNGSI AUTHENTIKASI
    ========================================================= */
+function handleLogin() {
+  const uInput = document.getElementById('login-username').value.trim();
+  const pInput = document.getElementById('login-password').value.trim();
+  const user = DB.users.find(u => u.username === uInput && u.password === pInput);
 
-function handleLogin(){
-  const username = document.getElementById('login-username').value.trim();
-  const password = document.getElementById('login-password').value;
-  const errEl = document.getElementById('login-error');
-
-  const user = DB.users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
-
-  if(!user){
-    errEl.style.display = 'block';
-    return;
+  if (user) {
+    sessionStorage.setItem(SESSION_KEY, user.id);
+    CURRENT_USER = user;
+    alert("Login Berhasil!");
+    enterApp();
+  } else {
+    alert("Username atau Password salah!");
   }
-  errEl.style.display = 'none';
-  CURRENT_USER = user;
-  sessionStorage.setItem(SESSION_KEY, user.id);
-  enterApp();
 }
 
-function handleLogout(){
+function handleLogout() {
   sessionStorage.removeItem(SESSION_KEY);
   CURRENT_USER = null;
   document.getElementById('login-username').value = '';
@@ -1215,18 +1255,19 @@ function handleLogout(){
   showScreen('screen-login');
 }
 
-function tryRestoreSession(){
+function tryRestoreSession() {
   const id = sessionStorage.getItem(SESSION_KEY);
-  if(!id) return;
+  if (!id) return;
   const user = DB.users.find(u => u.id === id);
-  if(user){
+  if (user) {
     CURRENT_USER = user;
     enterApp();
   }
 }
 
-function enterApp(){
-  if(CURRENT_USER.role === 'admin'){
+function enterApp() {
+  if (!CURRENT_USER) return;
+  if (CURRENT_USER.role === 'admin') {
     document.getElementById('admin-display-name').textContent = CURRENT_USER.name;
     showScreen('screen-admin');
     renderAdminAll();
@@ -1237,439 +1278,35 @@ function enterApp(){
   }
 }
 
-function showScreen(id){
+function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
 
 /* =========================================================
-   USER DASHBOARD
+   UTIL & INIT
    ========================================================= */
-
-function getProgressFor(userId, materialId){
-  return DB.progress.find(p => p.userId === userId && p.materialId === materialId);
-}
-
-function renderUserDashboard(){
-  const materials = DB.materials;
-  const list = document.getElementById('user-material-list');
-  list.innerHTML = '';
-
-  let approvedCount = 0;
-
-  if(materials.length === 0){
-    list.innerHTML = '<div class="empty">Belum ada materi. Hubungi admin.</div>';
-  }
-
-  // Group by section
-  const sections = [];
-  const sectionMap = {};
-  materials.forEach(m => {
-    const sec = m.section || 'Materi';
-    if(!sectionMap[sec]){ sectionMap[sec] = []; sections.push(sec); }
-    sectionMap[sec].push(m);
-  });
-
-  const catColors = { 'Admin':'#2f6fed', 'Teknis':'#b45309', 'Tutorial':'#7240c9', 'Materi':'#be185d' };
-  const catBg    = { 'Admin':'#eef3ff', 'Teknis':'#fffbeb', 'Tutorial':'#f3effe', 'Materi':'#fce7f3' };
-
-  sections.forEach(sec => {
-    // Section header
-    const header = document.createElement('div');
-    header.style.cssText = 'font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#9aa2b8;padding:16px 2px 8px;';
-    header.textContent = sec;
-    list.appendChild(header);
-
-    sectionMap[sec].forEach(m => {
-      const prog = getProgressFor(CURRENT_USER.id, m.id);
-      let statusClass = 'no', statusLabel = 'Belum dipelajari';
-      if(prog){
-        if(prog.status === 'pending'){ statusClass='wait'; statusLabel='Menunggu verifikasi'; }
-        else if(prog.status === 'approved'){ statusClass='ok'; statusLabel='Terverifikasi'; approvedCount++; }
-        else if(prog.status === 'rejected'){ statusClass='no'; statusLabel='Ditolak, ulangi'; }
-      }
-
-      const cat = m.category || '';
-      const chipColor = catColors[cat] || '#6e7790';
-      const chipBg = catBg[cat] || '#f3f5f9';
-
-      const card = document.createElement('div');
-      card.className = 'material-card';
-      card.onclick = () => openDetail(m.id);
-      card.innerHTML = `
-        <div class="material-icon" style="background:${chipBg};color:${chipColor};">${escapeHtml(cat.slice(0,2).toUpperCase())}</div>
-        <div class="material-info">
-          <h3>${escapeHtml(m.title)}</h3>
-          <p style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span style="font-size:10.5px;font-weight:700;background:${chipBg};color:${chipColor};padding:2px 7px;border-radius:5px;">${escapeHtml(cat)}</span>
-            <span style="color:#9aa2b8;">·</span>
-            <span>${m.content.length > 45 ? escapeHtml(m.content.slice(0,45)) + '…' : escapeHtml(m.content)}</span>
-          </p>
-        </div>
-        <div class="status-pill ${statusClass}">${statusLabel}</div>
-      `;
-      list.appendChild(card);
-    });
-  });
-
-  const total = materials.length;
-  const pct = total > 0 ? Math.round((approvedCount/total)*100) : 0;
-  document.getElementById('progress-ring').style.setProperty('--pct', pct);
-  document.getElementById('progress-pct-text').textContent = pct + '%';
-  document.getElementById('progress-summary-line').textContent = `${approvedCount} dari ${total} materi selesai`;
-  document.getElementById('material-count-text').textContent = total + ' materi';
-}
-
-/* =========================================================
-   MATERIAL DETAIL
-   ========================================================= */
-
-function openDetail(materialId){
-  ACTIVE_MATERIAL_ID = materialId;
-  const m = DB.materials.find(x => x.id === materialId);
-  if(!m) return;
-
-  document.getElementById('detail-title').textContent = m.title;
-  document.getElementById('detail-content').textContent = m.content;
-
-  refreshDetailStatus();
-  document.getElementById('overlay-detail').classList.add('active');
-}
-
-function refreshDetailStatus(){
-  const prog = getProgressFor(CURRENT_USER.id, ACTIVE_MATERIAL_ID);
-  const pill = document.getElementById('detail-status-pill');
-  const btn = document.getElementById('detail-mark-btn');
-
-  if(!prog){
-    pill.className = 'status-pill no';
-    pill.textContent = 'Belum dipelajari';
-    btn.className = 'btn-mark to-submit';
-    btn.textContent = 'Tandai Sudah Dipelajari';
-    btn.disabled = false;
-    btn.onclick = submitProgress;
-  } else if(prog.status === 'pending'){
-    pill.className = 'status-pill wait';
-    pill.textContent = 'Menunggu verifikasi admin';
-    btn.className = 'btn-mark pending';
-    btn.textContent = 'Menunggu Verifikasi Admin';
-    btn.disabled = true;
-    btn.onclick = null;
-  } else if(prog.status === 'approved'){
-    pill.className = 'status-pill ok';
-    pill.textContent = 'Terverifikasi admin';
-    btn.className = 'btn-mark approved';
-    btn.textContent = '✓ Sudah Terverifikasi';
-    btn.disabled = true;
-    btn.onclick = null;
-  } else if(prog.status === 'rejected'){
-    pill.className = 'status-pill no';
-    pill.textContent = 'Ditolak admin — pelajari ulang';
-    btn.className = 'btn-mark to-submit';
-    btn.textContent = 'Ajukan Verifikasi Ulang';
-    btn.disabled = false;
-    btn.onclick = submitProgress;
-  }
-}
-
-function submitProgress(){
-  let prog = getProgressFor(CURRENT_USER.id, ACTIVE_MATERIAL_ID);
-  const now = new Date().toISOString();
-  if(prog){
-    prog.status = 'pending';
-    prog.submittedAt = now;
-    prog.reviewedAt = null;
-  } else {
-    DB.progress.push({
-      id: 'p-' + Date.now(),
-      userId: CURRENT_USER.id,
-      materialId: ACTIVE_MATERIAL_ID,
-      status: 'pending',
-      submittedAt: now,
-      reviewedAt: null
-    });
-  }
-  saveData(DB);
-  refreshDetailStatus();
-  showToast('Diajukan untuk verifikasi admin');
-}
-
-function closeDetail(){
-  document.getElementById('overlay-detail').classList.remove('active');
-  renderUserDashboard();
-}
-
-/* =========================================================
-   ADMIN — RENDER ALL
-   ========================================================= */
-
-function renderAdminAll(){
-  renderReviewQueue();
-  renderAdminMaterials();
-  renderAdminUsers();
-}
-
-function switchAdminTab(tab){
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
-}
-
-/* ---- Review queue ---- */
-
-function renderReviewQueue(){
-  const pending = DB.progress.filter(p => p.status === 'pending');
-  const list = document.getElementById('review-list');
-  list.innerHTML = '';
-
-  document.getElementById('review-count-text').textContent = pending.length + ' menunggu';
-
-  if(pending.length === 0){
-    list.innerHTML = '<div class="empty">Tidak ada pengajuan yang menunggu verifikasi.</div>';
-    return;
-  }
-
-  pending
-    .slice()
-    .sort((a,b) => new Date(b.submittedAt) - new Date(a.submittedAt))
-    .forEach(p => {
-      const user = DB.users.find(u => u.id === p.userId);
-      const material = DB.materials.find(m => m.id === p.materialId);
-      if(!user || !material) return;
-
-      const card = document.createElement('div');
-      card.className = 'review-card';
-      card.innerHTML = `
-        <div class="top-row">
-          <div>
-            <div class="who">${escapeHtml(user.name)}</div>
-            <div class="what">mengajukan: ${escapeHtml(material.title)}</div>
-          </div>
-          <div class="when">${formatDate(p.submittedAt)}</div>
-        </div>
-        <div class="review-actions">
-          <button class="btn-sm btn-approve" onclick="reviewProgress('${p.id}', 'approved')">Verifikasi ✓</button>
-          <button class="btn-sm btn-reject" onclick="reviewProgress('${p.id}', 'rejected')">Tolak</button>
-        </div>
-      `;
-      list.appendChild(card);
-    });
-}
-
-function reviewProgress(progressId, decision){
-  const prog = DB.progress.find(p => p.id === progressId);
-  if(!prog) return;
-  prog.status = decision;
-  prog.reviewedAt = new Date().toISOString();
-  saveData(DB);
-  renderReviewQueue();
-  renderAdminUsers();
-  showToast(decision === 'approved' ? 'Materi diverifikasi' : 'Materi ditolak, karyawan akan ulangi');
-}
-
-/* ---- Materials management ---- */
-
-function addMaterial(){
-  const titleEl = document.getElementById('new-material-title');
-  const contentEl = document.getElementById('new-material-content');
-  const title = titleEl.value.trim();
-  const content = contentEl.value.trim();
-
-  if(!title || !content){
-    showToast('Judul dan isi materi wajib diisi');
-    return;
-  }
-
-  DB.materials.push({
-    id: 'm-' + Date.now(),
-    title,
-    content,
-    createdAt: new Date().toISOString()
-  });
-  saveData(DB);
-
-  titleEl.value = '';
-  contentEl.value = '';
-  renderAdminMaterials();
-  showToast('Materi ditambahkan');
-}
-
-function deleteMaterial(materialId){
-  if(!confirm('Hapus materi ini? Semua progress karyawan terkait materi ini akan ikut terhapus.')) return;
-  DB.materials = DB.materials.filter(m => m.id !== materialId);
-  DB.progress = DB.progress.filter(p => p.materialId !== materialId);
-  saveData(DB);
-  renderAdminMaterials();
-  renderReviewQueue();
-  renderAdminUsers();
-  showToast('Materi dihapus');
-}
-
-function renderAdminMaterials(){
-  const list = document.getElementById('admin-material-list');
-  list.innerHTML = '';
-  document.getElementById('materials-count-text').textContent = DB.materials.length + ' materi';
-
-  if(DB.materials.length === 0){
-    list.innerHTML = '<div class="empty">Belum ada materi.</div>';
-    return;
-  }
-
-  const catColors = { 'Admin':'#2f6fed', 'Teknis':'#b45309', 'Tutorial':'#7240c9', 'Materi':'#be185d' };
-  const catBg    = { 'Admin':'#eef3ff', 'Teknis':'#fffbeb', 'Tutorial':'#f3effe', 'Materi':'#fce7f3' };
-
-  // Group by section
-  const sections = [];
-  const sectionMap = {};
-  DB.materials.forEach(m => {
-    const sec = m.section || 'Materi';
-    if(!sectionMap[sec]){ sectionMap[sec] = []; sections.push(sec); }
-    sectionMap[sec].push(m);
-  });
-
-  sections.forEach(sec => {
-    const header = document.createElement('div');
-    header.style.cssText = 'font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#9aa2b8;padding:16px 2px 8px;';
-    header.textContent = sec;
-    list.appendChild(header);
-
-    sectionMap[sec].forEach(m => {
-      const approvedCount = DB.progress.filter(p => p.materialId === m.id && p.status === 'approved').length;
-      const cat = m.category || '';
-      const chipColor = catColors[cat] || '#6e7790';
-      const chipBg = catBg[cat] || '#f3f5f9';
-      const row = document.createElement('div');
-      row.className = 'admin-material-row';
-      row.innerHTML = `
-        <div class="info">
-          <h4>${escapeHtml(m.title)}</h4>
-          <p style="display:flex;align-items:center;gap:6px;margin-top:3px;">
-            <span style="font-size:10.5px;font-weight:700;background:${chipBg};color:${chipColor};padding:2px 7px;border-radius:5px;">${escapeHtml(cat)}</span>
-            <span style="color:#9aa2b8;">·</span>
-            <span>${approvedCount} karyawan sudah verifikasi</span>
-          </p>
-        </div>
-        <button class="icon-btn" onclick="deleteMaterial('${m.id}')" title="Hapus materi">✕</button>
-      `;
-      list.appendChild(row);
-    });
-  });
-}
-
-/* ---- Users management ---- */
-
-function addUser(){
-  const nameEl = document.getElementById('new-user-name');
-  const usernameEl = document.getElementById('new-user-username');
-  const passwordEl = document.getElementById('new-user-password');
-
-  const name = nameEl.value.trim();
-  const username = usernameEl.value.trim();
-  const password = passwordEl.value.trim();
-
-  if(!name || !username || !password){
-    showToast('Nama, username, dan password wajib diisi');
-    return;
-  }
-  if(DB.users.some(u => u.username.toLowerCase() === username.toLowerCase())){
-    showToast('Username sudah dipakai');
-    return;
-  }
-
-  DB.users.push({
-    id: 'u-' + Date.now(),
-    name,
-    username,
-    password,
-    role: 'employee'
-  });
-  saveData(DB);
-
-  nameEl.value = '';
-  usernameEl.value = '';
-  passwordEl.value = '';
-  renderAdminUsers();
-  showToast('Karyawan ditambahkan');
-}
-
-function deleteUser(userId){
-  if(!confirm('Hapus karyawan ini? Semua progress belajarnya akan ikut terhapus.')) return;
-  DB.users = DB.users.filter(u => u.id !== userId);
-  DB.progress = DB.progress.filter(p => p.userId !== userId);
-  saveData(DB);
-  renderAdminUsers();
-  renderReviewQueue();
-  showToast('Karyawan dihapus');
-}
-
-function renderAdminUsers(){
-  const employees = DB.users.filter(u => u.role === 'employee');
-  const list = document.getElementById('admin-user-list');
-  list.innerHTML = '';
-  document.getElementById('users-count-text').textContent = employees.length + ' karyawan';
-
-  if(employees.length === 0){
-    list.innerHTML = '<div class="empty">Belum ada karyawan terdaftar.</div>';
-    return;
-  }
-
-  const totalMaterials = DB.materials.length;
-
-  employees.forEach(u => {
-    const approvedCount = DB.progress.filter(p => p.userId === u.id && p.status === 'approved').length;
-    const initials = u.name.split(' ').map(w => w[0]).slice(0,2).join('').toUpperCase();
-
-    const row = document.createElement('div');
-    row.className = 'user-row';
-    row.innerHTML = `
-      <div class="user-avatar">${escapeHtml(initials)}</div>
-      <div class="info">
-        <h4>${escapeHtml(u.name)}</h4>
-        <p>@${escapeHtml(u.username)}</p>
-      </div>
-      <div class="badge-progress">${approvedCount}/${totalMaterials}</div>
-      <button class="icon-btn" onclick="deleteUser('${u.id}')" title="Hapus karyawan">✕</button>
-    `;
-    list.appendChild(row);
-  });
-}
-
-/* =========================================================
-   UTIL
-   ========================================================= */
-
-function escapeHtml(str){
+function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
 }
 
-function formatDate(iso){
+function formatDate(iso) {
   const d = new Date(iso);
-  return d.toLocaleDateString('id-ID', { day:'numeric', month:'short' }) + ', ' +
-         d.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) + ', ' +
+         d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 }
 
-let toastTimer = null;
-function showToast(msg){
+function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+  setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-document.getElementById('login-password').addEventListener('keydown', e => {
-  if(e.key === 'Enter') handleLogin();
-});
-document.getElementById('login-username').addEventListener('keydown', e => {
-  if(e.key === 'Enter') handleLogin();
-});
-
-/* =========================================================
-   INIT
-   ========================================================= */
+// Inisialisasi
 tryRestoreSession();
+
 </script>
-</body>
 </html>
